@@ -790,7 +790,7 @@ int main(int argc, char *argv[])
             case 12: addInterface(); break;
             case 13: addResource(); break;
             case 14: changeAttribute(); break;
-			case 15: printMainMenu(); break;
+	    case 15: printMainMenu(); break;
             case 0: cont = false;
         }
     }
