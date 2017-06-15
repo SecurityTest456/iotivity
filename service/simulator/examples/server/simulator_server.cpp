@@ -356,7 +356,10 @@ void printMainMenu()
     std::cout << "10. Set Device Info" << std::endl;
     std::cout << "11. Set Platform Info" << std::endl;
     std::cout << "12. Add Interface" << std::endl;
-    std::cout << "13. Help" << std::endl;
+    std::cout << "13. Add Resource Manually" << std::endl;
+	std::cout << "14. Change Rsource Attribute Manually" << std::endl;
+	std::cout << "15. PrintMenu" << std::endl;
+    std::cout << "16. Help" << std::endl;
     std::cout << "0. Exit" << std::endl;
     std::cout << "######################################" << std::endl;
 }
@@ -453,6 +456,326 @@ void addInterface()
     resource->addInterface(OC_RSRVD_INTERFACE_ACTUATOR);
 }
 
+void modelChangeCall(const std::string & uri, const SimulatorResourceModel & resModel)
+{
+	std::cout << "########################" << std::endl;
+	std::cout << "[callback] Resource model is changed URI: " << uri.c_str() << std::endl;
+	std::cout << "#### Modified attributes are ####" << std::endl;
+	std::cout << "#### Updated resource model ####" << std::endl;
+	std::cout << resModel.asString() << std::endl;
+	std::cout << "########################" << std::endl;
+}
+
+void observerCall(const std::string & uri, ObservationStatus state, const ObserverInfo & observerInfo)
+{
+	std::cout << "########################" << std::endl;
+    std::cout << "[callback] Observer notification received..." << uri << std::endl;
+
+    std::ostringstream out("",std::ios_base::out);
+    out << "ID:  " << (int) observerInfo.id << std::endl;
+    out << " [address: " << observerInfo.address << " port: " << observerInfo.port << "]" << std::endl;
+    out << "State: " << ((state == ObservationStatus::REGISTER) ? "REGISTER" : "UNREGISTER") << std::endl;
+    std::cout << out.str() << std::endl;
+}
+
+bool validateData(const std::string & str1,const std::string & str2,const std::string & str3)
+{
+	if((str1.empty() == true) || (str2.empty() == true) || (str3.empty() == true))
+	{
+		return false;
+	}
+
+	return true;
+}
+
+void addResource()
+{
+    try
+    {
+	    std::string name,uri,type;	
+	    std::cout << "Enter Resource Name" << std::endl;
+	    std::cin >> name;	
+	    std::cout << "Enter Resource URI" << std::endl;
+	    std::cin >> uri;
+	    std::cout << "Enter Resource Type " << std::endl;
+	    std::cin >> type;
+        
+	    if(false == validateData(name,uri,type))
+	    {
+		    std::cout << "Could not process ur request\n Wrong Input is entered" << std::endl; 
+		    return;
+	    }
+
+	    SimulatorResourceSP resource = SimulatorManager::getInstance()->createSingleResource(name,uri,type);
+        SimulatorResource::ResourceModelUpdateCallback modelChangeCB = modelChangeCall;
+
+        // Observer added/removed callback
+        SimulatorResource::ObserverCallback observerCB = observerCall;
+
+        if (SimulatorResource::Type::SINGLE_RESOURCE == resource->getType())
+        {
+		    std::cout << "Single type resource created [URI:  " << resource->getURI() << " ]" << std::endl;
+		    SimulatorSingleResourceSP singleRes = std::dynamic_pointer_cast<SimulatorSingleResource>(resource);
+		    if (!singleRes)
+		    {
+                std::cout << "Error occured while converting SimulatorResource to SimulatorSingleResource!" << std::endl;
+	            return;
+ 		    }
+            
+            singleRes->setModelChangeCallback(modelChangeCB);
+            singleRes->setObserverCallback(observerCB);
+            g_singleResources.push_back(singleRes);
+        }
+    }
+    catch (InvalidArgsException &e)
+    {
+        std::cout << "InvalidArgsException occured [code : " << e.code() << " Details: "
+                  << e.what() << "]" << std::endl;
+    }
+    catch (SimulatorException &e)
+    {
+        std::cout << "SimulatorException occured [code : " << e.code() << " Details: "
+                  << e.what() << "]" << std::endl;
+    }
+}
+
+void updateAttr(SimulatorSingleResourceSP resource)
+{
+    SimulatorResourceAttribute attribute;
+    std::string name;
+    std::cout << "Enter Atribute name to get update" << std::endl;
+    std::cout << resource->getResourceModel().asString() << std::endl;
+    std::cin >> name;
+        
+    bool result;
+    result = resource->getAttribute(name,attribute);
+    if(result==0)
+    {
+        std::cout << "Entered attribute does not exist" << std::endl;
+        return;
+    }
+    
+    if(attribute.getProperty()->isInteger())
+    {
+        int iVal;
+        std::cout << "Enter integer value" << std::endl;
+        std::cin >> iVal;
+        while(std::cin.fail())
+        {
+            std::cout << "Integer value not entered" << std::endl;
+            std::cout << "Enter Integer Value" << std::endl;
+            std::cin.clear();
+            std::cin.ignore(256,'\n');
+            std::cin >> iVal;
+        }
+               
+        attribute.setValue(iVal);
+        result=resource->updateAttributeValue(attribute,true);
+    }
+    
+    if(attribute.getProperty()->isString())
+    {
+        std::string sVal;
+        std::cout << "Enter string value" << std::endl;
+        std::cin >> sVal;
+        attribute.setValue(sVal);
+        result = resource->updateAttributeValue(attribute,true);
+    }
+    
+    if(attribute.getProperty()->isBoolean())
+    {
+        bool bVal;
+        std::cout << "Enter boolean value" << std::endl;
+        std::cin >> bVal;
+        while(std::cin.fail())
+        {
+            std::cout << "Boolean value not entered" << std::endl;
+            std::cout << "Enter Boolean Value" << std::endl;
+            std::cin.clear();
+            std::cin.ignore(256,'\n');
+            std::cin >> bVal;
+        }
+
+        attribute.setValue(bVal);
+        result = resource->updateAttributeValue(attribute,true);
+    }
+    
+    if (result)
+        std::cout << "Attribute added successfully" << std::endl;
+    else
+        std::cout << "Unable to add Attribute" << std::endl;
+
+    return;
+}
+
+
+void addAttr(SimulatorSingleResourceSP resource)
+{
+    SimulatorResourceAttribute attribute;	
+	std::string name;
+	int choice;
+
+	std::cout << "Enter Attribute Name" << std::endl;
+	std::cin >> name;
+	
+	std::map<std::string, SimulatorResourceAttribute> attributes = resource->getAttributes();
+
+    for (auto &attributeEntry : attributes)
+    {
+        if(attributeEntry.first == name)
+        {		
+	        std::cout << attributeEntry.first << std::endl;			              
+			std::cout << "Entered Attribute already exist" << std::endl;
+            return;
+        }
+    }
+    
+	std::cout << "Enter the property type" << std::endl;
+	std::cout << "1.Integer" << std::endl;
+	std::cout << "2.String" << std::endl;
+	std::cout << "3.Boolean" << std::endl;
+
+	std::cin >> choice;
+
+	switch(choice)
+	{
+            
+        case 1:
+		{
+			int iVal;
+			std::cout << "Enter value" << std::endl;
+			std::cin >> iVal;
+				
+			while(std::cin.fail())
+			{
+				cin.clear();
+				std::cin.ignore(256,'\n');
+				std::cout << "Enter the integer value" << std::endl;
+				std::cin >> iVal;
+			}
+		
+		    std::shared_ptr<IntegerProperty> ptr;
+			ptr = IntegerProperty::build();
+			attribute.setProperty(ptr);
+			attribute.setValue(iVal);			
+		}
+        break;	     
+		case 2:
+        {
+        	std::string sVal;
+			std::cout << "Enter value" << std::endl;
+            std::cin >> sVal;
+		    std::shared_ptr<StringProperty> ptr;
+			ptr=StringProperty::build();
+			attribute.setProperty(ptr);
+			attribute.setValue(sVal);
+		}
+		break; 	     
+		case 3:
+        {                
+			bool bVal;
+			std::cout << "Enter value" << std::endl;
+			std::cin >> bVal;
+	        
+			while(std::cin.fail())
+			{
+				cin.clear();
+				std::cin.ignore(256,'\n');
+				std::cout << "Enter the boolean value(0-1)" << std::endl;
+				std::cin >> bVal;
+			}
+		
+			std::shared_ptr<BooleanProperty> ptr;
+			ptr = BooleanProperty::build();
+            attribute.setProperty(ptr);
+			attribute.setValue(bVal);
+		}
+		break;			
+	    default:
+		{
+			std::cout << "Invalid input" << std::endl;
+			break;
+		}  	
+	}
+	attribute.setName(name);
+
+	bool result;
+	result = resource->addAttribute(attribute, true);
+	if (result)
+	    std::cout << "Attribute added successfully" << std::endl;
+	else
+	    std::cout << "Unable to add Attribute" << std::endl;
+	
+	return;		
+}
+
+void remAttr(SimulatorSingleResourceSP resource)
+{
+	 // Attributes
+    std::cout << "##### Attributes of the selected resource #####" << std::endl;
+    std::cout << resource->getResourceModel().asString() << std::endl;
+    std::cout << "###############################################" << std::endl;
+
+	std::string name;
+    std::cout << "Enter the name of the Attribute you want to remove " << std::endl;
+    std::cin >> name;
+
+	bool result;
+	result = resource->removeAttribute(name,true);
+
+	if (result)
+        std::cout << "Attribute removed successfully" << std::endl;
+    else
+        std::cout << "Entered Attribute does not exist" << std::endl;
+
+    return;
+}
+
+void changeAttribute()
+{
+	int index = selectResource();
+	if (-1 == index) 
+        return;
+    
+	SimulatorSingleResourceSP resource = g_singleResources[index - 1];
+	bool ret = true;	
+	while (ret)
+	{
+        std::cout << "1. Update Attribute value" << std::endl;
+		std::cout << "2. Add New Attribute" << std::endl;
+		std::cout << "3. Remove Attribute" << std::endl;
+		std::cout << "0. Exit" << std::endl;
+        
+		int choice = -1;
+		std::cout << "Enter your choice: ";
+		std::cin >> choice;		
+		if (choice < 0 || choice > 3)
+		{
+			std::cout << "Invalid choice" << std::endl; 
+            continue;
+		}
+		switch (choice)
+		{
+			case 0: 
+                ret = false;
+	          	printMainMenu();
+			    break;
+            case 1: 
+                updateAttr(resource);
+                break;
+			case 2: 
+                addAttr(resource);
+                break;
+			case 3: 
+                remAttr(resource);
+                break;
+			default: 
+                std::cout << "Invalid choice" << std::endl;
+				break;
+		}		
+	}
+}
+
 int main(int argc, char *argv[])
 {
     printMainMenu();
@@ -462,7 +785,7 @@ int main(int argc, char *argv[])
         int choice = -1;
         std::cout << "Enter your choice: ";
         std::cin >> choice;
-        if (choice < 0 || choice > 14)
+        if (choice < 0 || choice > 15)
         {
             std::cout << "Invaild choice !" << std::endl; continue;
         }
@@ -481,7 +804,9 @@ int main(int argc, char *argv[])
             case 10: setDeviceInfo(); break;
             case 11: setPlatformInfo(); break;
             case 12: addInterface(); break;
-            case 13: printMainMenu(); break;
+            case 13: addResource(); break;
+            case 14: changeAttribute(); break;
+			case 15: printMainMenu(); break;
             case 0: cont = false;
         }
     }
