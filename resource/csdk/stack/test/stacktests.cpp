@@ -758,7 +758,7 @@ TEST(StackDiscovery, DISABLED_DoResourceDeviceDiscovery)
 
     /* Start a discovery query*/
     char szQueryUri[MAX_QUERY_LENGTH] = { 0 };
-    strcpy(szQueryUri, OC_RSRVD_WELL_KNOWN_URI);
+    strncpy(szQueryUri, OC_RSRVD_WELL_KNOWN_URI, strlen(OC_RSRVD_WELL_KNOWN_URI) + 1);
     cbData.cb = asyncDoResourcesCallback;
     cbData.context = (void*)DEFAULT_CONTEXT_VALUE;
     cbData.cd = NULL;
@@ -786,7 +786,7 @@ TEST(StackResource, DISABLED_UpdateResourceNullURI)
 
     /* Start a discovery query*/
     char szQueryUri[MAX_QUERY_LENGTH] = { 0 };
-    strcpy(szQueryUri, OC_RSRVD_WELL_KNOWN_URI);
+    strncpy(szQueryUri, OC_RSRVD_WELL_KNOWN_URI, strlen(OC_RSRVD_WELL_KNOWN_URI) + 1);
     cbData.cb = asyncDoResourcesCallback;
     cbData.context = (void*)DEFAULT_CONTEXT_VALUE;
     cbData.cd = NULL;
@@ -2509,7 +2509,7 @@ TEST(StackUri, Rfc6874_NoOverflow)
 
     // Just enough room to encode
     addrBuffer[sizeof(addrBuffer) - sizeof(validIPv6Address) - 3] = '\0';
-    strcat(addrBuffer, validIPv6Address);
+    strncat(addrBuffer, validIPv6Address, strlen(validIPv6Address));
 
     OCStackResult result = OCEncodeAddressForRFC6874(bytes, sizeof(bytes), addrBuffer);
 
@@ -2526,7 +2526,7 @@ TEST(StackUri, Rfc6874_NoOverflow_2)
 
     // Not enough room to encode
     addrBuffer[sizeof(addrBuffer) - sizeof(validIPv6Address) - 1] = '\0';
-    strcat(addrBuffer, validIPv6Address);
+    strncat(addrBuffer, validIPv6Address, strlen(validIPv6Address));
 
     OCStackResult result = OCEncodeAddressForRFC6874(bytes, sizeof(bytes), addrBuffer);
 
