@@ -806,11 +806,11 @@ OCStackResult BuildStringFromActionSet(OCActionSet* actionset, char** desc)
             goto exit;
         }
 
-        strcat(temp, "uri=");
+        strncat(temp, "uri=", sizeof("uri="));
         remaining -= strlen("uri=");
-        strcat(temp, action->resourceUri);
+        strncat(temp, action->resourceUri, strlen(action->resourceUri) + 1);
         remaining -= strlen(action->resourceUri);
-        strcat(temp, "|");
+        strncat(temp, "|", sizeof("|"));
         remaining--;
 
         OCCapability *capas = action->head;
@@ -823,11 +823,11 @@ OCStackResult BuildStringFromActionSet(OCActionSet* actionset, char** desc)
                 goto exit;
             }
 
-            strcat(temp, capas->capability);
+            strncat(temp, capas->capability, strlen(capas->capability) + 1);
             remaining -= strlen(capas->capability);
-            strcat(temp, "=");
+            strncat(temp, "=", sizeof("="));
             remaining--;
-            strcat(temp, capas->status);
+            strncat(temp, capas->status, strlen(capas->status) + 1);
             remaining -= strlen(capas->status);
 
             capas = capas->next;
@@ -838,7 +838,7 @@ OCStackResult BuildStringFromActionSet(OCActionSet* actionset, char** desc)
                     res = OC_STACK_ERROR;
                     goto exit;
                 }
-                strcat(temp, "|");
+                strncat(temp, "|", sizeof("|"));
                 remaining --;
             }
         }
@@ -851,7 +851,7 @@ OCStackResult BuildStringFromActionSet(OCActionSet* actionset, char** desc)
                 res = OC_STACK_ERROR;
                 goto exit;
             }
-            strcat(temp, ACTION_DELIMITER);
+            strncat(temp, ACTION_DELIMITER, sizeof(ACTION_DELIMITER));
             remaining--;
         }
     }
