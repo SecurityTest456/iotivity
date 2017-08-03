@@ -49,6 +49,9 @@ extern "C"
 #define cJSON_IsReference 256
 #define cJSON_StringIsConst 512
 
+#define CJSON_VERSION_SIZE 15
+#define EXTEND_BUFFER_FOR_FLOAT 64
+  
 /* The cJSON structure: */
 typedef struct cJSON
 {
