@@ -137,8 +137,7 @@ OCStackApplicationResult getReqCB(void* ctx,
     OIC_LOG(INFO, TAG, "Get Response =============> ");
     OIC_LOG_PAYLOAD(INFO, clientResponse->payload);
 
-    if(clientResponse->rcvdVendorSpecificHeaderOptions &&
-            clientResponse->numRcvdVendorSpecificHeaderOptions)
+    if(clientResponse->numRcvdVendorSpecificHeaderOptions)
     {
         OIC_LOG (INFO, TAG, "Received vendor specific options");
         uint8_t i = 0;
