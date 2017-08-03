@@ -73,7 +73,7 @@ unsigned int coap_opt_block_num(const coap_opt_t *block_opt);
  */
 INLINE_API int coap_more_blocks(size_t data_len, unsigned int num, unsigned short szx)
 {
-    return ((num + 1) << (szx + 4)) < data_len;
+    return (((size_t)num + (size_t)1) << ((size_t)szx + (size_t)4)) < data_len;
 }
 
 /** Sets the More-bit in @p block_opt */
