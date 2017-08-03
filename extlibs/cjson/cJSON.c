@@ -63,8 +63,8 @@ CJSON_PUBLIC(const char *) cJSON_GetErrorPtr(void)
 
 CJSON_PUBLIC(const char*) cJSON_Version(void)
 {
-    static char version[15];
-    sprintf(version, "%i.%i.%i", CJSON_VERSION_MAJOR, CJSON_VERSION_MINOR, CJSON_VERSION_PATCH);
+    static char version[CJSON_VERSION_SIZE];
+    snprintf(version, CJSON_VERSION_SIZE, "%i.%i.%i", CJSON_VERSION_MAJOR, CJSON_VERSION_MINOR, CJSON_VERSION_PATCH);
 
     return version;
 }
@@ -451,7 +451,7 @@ static cJSON_bool print_number(const cJSON * const item, printbuffer * const out
     }
 
     /* This is a nice tradeoff. */
-    output_pointer = ensure(output_buffer, 64, hooks);
+    output_pointer = ensure(output_buffer, EXTEND_BUFFER_FOR_FLOAT, hooks);
     if (output_pointer == NULL)
     {
         return false;
@@ -460,22 +460,22 @@ static cJSON_bool print_number(const cJSON * const item, printbuffer * const out
     /* This checks for NaN and Infinity */
     if ((d * 0) != 0)
     {
-        length = sprintf((char*)output_pointer, "null");
+        length = snprintf((char*)output_pointer, EXTEND_BUFFER_FOR_FLOAT, "null");
     }
     else if ((fabs(floor(d) - d) <= DBL_EPSILON) && (fabs(d) < 1.0e60))
     {
         /* integer */
-        length = sprintf((char*)output_pointer, "%.0f", d);
+        length = snprintf((char*)output_pointer, EXTEND_BUFFER_FOR_FLOAT, "%.0f", d);
         trim_zeroes = false; /* don't remove zeroes for "big integers" */
     }
     else if ((fabs(d) < 1.0e-6) || (fabs(d) > 1.0e9))
     {
-        length = sprintf((char*)output_pointer, "%e", d);
+        length = snprintf((char*)output_pointer, EXTEND_BUFFER_FOR_FLOAT, "%e", d);
         trim_zeroes = false; /* don't remove zeroes in engineering notation */
     }
     else
     {
-        length = sprintf((char*)output_pointer, "%f", d);
+        length = snprintf((char*)output_pointer, EXTEND_BUFFER_FOR_FLOAT, "%f", d);
     }
 
     /* sprintf failed */
@@ -891,7 +891,7 @@ static cJSON_bool print_string_ptr(const unsigned char * const input, printbuffe
                     break;
                 default:
                     /* escape and print as unicode codepoint */
-                    sprintf((char*)output_pointer, "u%04x", *input_pointer);
+                    snprintf((char*)output_pointer, output_length + sizeof("\"\""), "u%04x", *input_pointer);
                     output_pointer += 4;
                     break;
             }
