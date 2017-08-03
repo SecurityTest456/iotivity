@@ -151,7 +151,7 @@ static bool CACheckTimeout(uint64_t currentTime, CARetransmissionData_t *retData
 #ifndef SINGLE_THREAD
     // #1. calculate timeout
     uint64_t milliTimeoutValue = retData->timeout / USECS_PER_MSEC;
-    uint64_t timeout = (milliTimeoutValue << retData->triedCount) * USECS_PER_MSEC;
+    uint64_t timeout = ((uint64_t)milliTimeoutValue << (uint64_t)retData->triedCount) * (uint64_t)USECS_PER_MSEC;
 
     if (currentTime >= retData->timeStamp + timeout)
     {
