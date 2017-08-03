@@ -176,6 +176,7 @@ TEST(DoxmResourceTest, CBORPayloadToDoxmVALID)
     OicSecDoxm_t *doxmSec = NULL;
     EXPECT_EQ(OC_STACK_OK, CBORPayloadToDoxm(payload, size, &doxmSec));
     ASSERT_TRUE(doxmSec != NULL);
+    ASSERT_TRUE(doxm != NULL);
     EXPECT_EQ(doxmSec->oxm[0], doxm->oxm[0]);
     EXPECT_EQ(doxmSec->oxmSel, doxm->oxmSel);
     EXPECT_EQ(doxmSec->sct, doxm->sct);
