@@ -320,6 +320,7 @@ void NSConsumerCommunicationTaskProcessing(NSTask * task)
         NS_LOG(DEBUG, "Request Subscribe");
         NSResult ret = NSConsumerSubscribeProvider((NSProvider *)task->taskData);
         NSRemoveProvider_internal((void *) task->taskData);
+        task->taskData = NULL;
         NS_VERIFY_NOT_NULL_WITH_POST_CLEANING_V(ret == NS_OK ? (void *)1 : NULL,
         {
                 NSOICFree(task->taskData);
