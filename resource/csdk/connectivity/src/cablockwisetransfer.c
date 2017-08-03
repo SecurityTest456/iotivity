@@ -52,7 +52,7 @@
 #define BLOCK_M_BIT_IDX            3
 #define PORT_LENGTH                2
 
-#define BLOCK_SIZE(arg) (1 << ((arg) + 4))
+#define BLOCK_SIZE(arg) (1U << ((arg) + 4U))
 
 // context for block-wise transfer
 static CABlockWiseContext_t g_context = { .sendThreadFunc = NULL,
@@ -66,7 +66,7 @@ static bool CACheckPayloadLength(const CAData_t *sendData)
     CAGetPayloadInfo(sendData, &payloadLen);
 
     // check if message has to be transfered to a block
-    size_t maxBlockSize = BLOCK_SIZE(CA_DEFAULT_BLOCK_SIZE);
+    size_t maxBlockSize = BLOCK_SIZE((size_t)CA_DEFAULT_BLOCK_SIZE);
     OIC_LOG_V(DEBUG, TAG, "payloadLen=%" PRIuPTR ", maxBlockSize=%" PRIuPTR, payloadLen, maxBlockSize);
 
     if (payloadLen <= maxBlockSize)
@@ -1315,7 +1315,7 @@ CAResult_t CASetMoreBitFromBlock(size_t payloadLen, coap_block_t *block)
 {
     VERIFY_NON_NULL(block, TAG, "block");
 
-    if ((size_t) ((block->num + 1) << (block->szx + BLOCK_NUMBER_IDX)) < payloadLen)
+    if ((((size_t)block->num + 1) << (block->szx + BLOCK_NUMBER_IDX)) < payloadLen)
     {
         OIC_LOG(DEBUG, TAG, "Set the M-bit(1)");
         block->m = 1;
@@ -1976,7 +1976,7 @@ uint8_t CACheckBlockErrorType(CABlockData_t *currData, coap_block_t *receivedBlo
 
     // #3. check if error check logic is required
     size_t optionLen = dataLen - blockPayloadLen;
-    if (receivedBlock->m && blockPayloadLen != (size_t) BLOCK_SIZE(receivedBlock->szx))
+    if (receivedBlock->m && blockPayloadLen !=  BLOCK_SIZE((size_t)receivedBlock->szx))
     {
         // 413 Error handling of too large entity
         if (COAP_MAX_PDU_SIZE < ((size_t)BLOCK_SIZE(receivedBlock->szx)) + optionLen)
@@ -2052,7 +2052,7 @@ CAResult_t CAUpdatePayloadData(CABlockData_t *currData, const CAData_t *received
     if (CA_BLOCK_TOO_LARGE == status)
     {
         blockPayloadLen = (COAP_OPTION_BLOCK2 == blockType) ?
-                BLOCK_SIZE(currData->block2.szx) : BLOCK_SIZE(currData->block1.szx);
+                BLOCK_SIZE((size_t)currData->block2.szx) : BLOCK_SIZE((size_t)currData->block1.szx);
     }
 
     // memory allocation for the received block payload
