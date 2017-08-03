@@ -612,7 +612,7 @@ GetObserveHeaderOption (uint32_t * observationOption,
         if (options[i].protocolID == CA_COAP_ID &&
                 options[i].optionID == COAP_OPTION_OBSERVE)
         {
-            *observationOption = options[i].optionData[0];
+            *observationOption = (uint32_t)options[i].optionData[0];
             for(uint8_t c = i; c < *numOptions-1; c++)
             {
                 options[i] = options[i+1];
