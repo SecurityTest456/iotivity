@@ -48,8 +48,9 @@ TEST(AMACLResourceTest, CBORAMACLConversion)
     if (!secAmacl->resources)
     {
         DeleteAmaclList(secAmacl);
+        secAmacl = NULL;
     }
-    ASSERT_TRUE(NULL != secAmacl->resources);
+    ASSERT_TRUE((NULL != secAmacl)&&(NULL != secAmacl->resources));
     for (size_t i = 0 ; i < secAmacl->resourcesLen; i++)
     {
         secAmacl->resources[i] = OICStrdup(rsrc[i]);
@@ -60,6 +61,7 @@ TEST(AMACLResourceTest, CBORAMACLConversion)
     if (!secAmacl1)
     {
         DeleteAmaclList(secAmacl);
+        secAmacl = NULL;
     }
     ASSERT_TRUE(NULL != secAmacl1);
 
@@ -70,9 +72,11 @@ TEST(AMACLResourceTest, CBORAMACLConversion)
     if (!secAmacl1->resources)
     {
         DeleteAmaclList(secAmacl);
+        secAmacl = NULL;
         DeleteAmaclList(secAmacl1);
+        secAmacl1 = NULL;
     }
-    ASSERT_TRUE(NULL != secAmacl1->resources);
+    ASSERT_TRUE((NULL != secAmacl1)&&(NULL != secAmacl1->resources));
     for (size_t i = 0 ; i < secAmacl1->resourcesLen; i++)
     {
         secAmacl1->resources[i] = OICStrdup(rsrc1[i]);
@@ -87,6 +91,7 @@ TEST(AMACLResourceTest, CBORAMACLConversion)
     if (!psStorage)
     {
         DeleteAmaclList(secAmacl);
+        secAmacl = NULL;
     }
     ASSERT_TRUE(NULL != psStorage);
 
@@ -95,7 +100,9 @@ TEST(AMACLResourceTest, CBORAMACLConversion)
     if (!amacl)
     {
         DeleteAmaclList(secAmacl);
+        secAmacl = NULL;
         OICFree(psStorage);
+        psStorage = NULL;        
     }
     ASSERT_TRUE(NULL != amacl);
 
@@ -104,6 +111,9 @@ TEST(AMACLResourceTest, CBORAMACLConversion)
     EXPECT_EQ(secAmacl->resourcesLen, amacl->resourcesLen);
 
     DeleteAmaclList(secAmacl);
+    secAmacl = NULL;
     DeleteAmaclList(amacl);
+    amacl = NULL;
     OICFree(psStorage);
+    psStorage = NULL;        
 }
